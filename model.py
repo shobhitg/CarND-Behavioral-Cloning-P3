@@ -33,7 +33,7 @@ class BehavioralCloningNN:
 
 
 		# Uncomment below to trim down the data for quicker testing.
-		self.data = self.data.sample(n=5)
+		# self.data = self.data.sample(n=50)
 
 		# Create a timestamp comumn in the data, might get useful later
 		df = self.data['Center Image'].str.split('[_.]', expand=True).get([1,2,3,4,5,6,7]).astype(int)
@@ -49,19 +49,19 @@ class BehavioralCloningNN:
 		# normalize all numeric fields
 		numeric_df = self.data[['Steering Angle', 'Throttle', 'Break', 'Speed']].astype(float)
 		data_norm = (numeric_df - numeric_df.mean()) / (numeric_df.max() - numeric_df.min())
-		data_norm.plot(figsize=(20, 5))
-		self.data['Steering Angle'] = data_norm['Steering Angle']
-		self.data['Throttle'] = data_norm['Throttle']
-		self.data['Break'] = data_norm['Break']
-		self.data['Speed'] = data_norm['Speed']
+		# data_norm.plot(figsize=(20, 5))
+		#self.data['Steering Angle'] = data_norm['Steering Angle']
+		#self.data['Throttle'] = data_norm['Throttle']
+		#self.data['Break'] = data_norm['Break']
+		#self.data['Speed'] = data_norm['Speed']
 
-		print ("Data loaded from folder:", self.data_path)
+		print ("Data csv loaded from folder:", self.data_path)
 
 
 	# Just for a plot based on timeline.
 	def timeline_plot(self):
 		mumeric_df = self.data[['Steering Angle', 'Throttle', 'Break', 'Speed']].astype(float)
-		mumeric_df.plot(figsize=(20, 5))
+		# mumeric_df.plot(figsize=(20, 5))
 
 	# histogram of steering angles
 	def hist(self):
@@ -115,7 +115,7 @@ class BehavioralCloningNN:
 
 	def preprocessImage(self, image):
 		shape = image.shape
-		image = image[56:160,:,:]
+		image = image[40:160,:,:]
 		image = cv2.resize(image,(200, 66), interpolation=cv2.INTER_AREA)    
 		return image
 
@@ -133,32 +133,29 @@ class BehavioralCloningNN:
 	def load_image_and_preprocess(self, imageData, i_lrc):    
 		if (i_lrc == 0):
 			path_file = imageData['Left Image']
-			shift_ang = .05
+			shift_ang = .25
 		if (i_lrc == 1):
 			path_file = imageData['Center Image']
 			shift_ang = 0.
 		if (i_lrc == 2):
 			path_file = imageData['Right Image']
-			shift_ang = -.05
+			shift_ang = -.25
 		y_steer = imageData['Steering Angle'] + shift_ang
 		# all_images.push(images.iloc[i]['Center Image'])
 		# Load the center image and weight.
 		image = self.load_image(path_file)
-	#         center_image = load_image(images.iloc[i]['Center Image'])
-	#         right_image = load_image(images.iloc[i]['Right Image'])
 
-
-	#     image,y_steer,tr_x = self.trans_image(image,y_steer,100)
-		image = self.augment_brightness_camera_images(image)
-		image = self.add_random_shadow(image)
+		#image,y_steer,tr_x = self.trans_image(image,y_steer,100)
+		#image = self.augment_brightness_camera_images(image)
+		#image = self.add_random_shadow(image)
 		image = self.preprocessImage(image)
 		image = np.array(image)
-		ind_flip = np.random.randint(2)
-		if ind_flip==0:
-			image = cv2.flip(image,1)
-			y_steer = -y_steer
+		#ind_flip = np.random.randint(2)
+		#if ind_flip==0:
+		flipped_image = cv2.flip(image,1)
+		flipped_y_steer = -y_steer
 
-		return image,y_steer
+		return image,y_steer,flipped_image,flipped_y_steer
 
 
 
@@ -173,21 +170,38 @@ class BehavioralCloningNN:
 			# Load the center image and weight.
 			# left_image = load_image(self.data.iloc[i]['Left Image'])
 
-		#     i_lrc = np.random.randint(3)
-		#     x, y = load_image_and_preprocess(self.data.iloc[i], i_lrc)
-		#     self.X_train.append(x)
-		#     self.y_train.append(y)
+			i_lrc = np.random.randint(3)
+			x, y, fx, fy = self.load_image_and_preprocess(self.data.iloc[i], i_lrc)
+			self.X_train.append(x)
+			self.y_train.append(y)
+			self.X_train.append(fx)
+			self.y_train.append(fy)
 
-			x, y = self.load_image_and_preprocess(self.data.iloc[i], 0)
-			self.X_train.append(x)
-			self.y_train.append(y)
-			x, y = self.load_image_and_preprocess(self.data.iloc[i], 1)
-			self.X_train.append(x)
-			self.y_train.append(y)
-			x, y = self.load_image_and_preprocess(self.data.iloc[i], 2)
-			self.X_train.append(x)
-			self.y_train.append(y)
 
+			#x, y, fx, fy = self.load_image_and_preprocess(self.data.iloc[i], 0)
+			#self.X_train.append(x)
+			#self.y_train.append(y)
+			#self.X_train.append(fx)
+			#self.y_train.append(fy)
+			
+
+			#x, y, fx, fy = self.load_image_and_preprocess(self.data.iloc[i], 1)
+			#self.X_train.append(x)
+			#self.y_train.append(y)
+			#self.X_train.append(fx)
+			#self.y_train.append(fy)
+			
+
+			#x, y, fx, fy = self.load_image_and_preprocess(self.data.iloc[i], 2)
+			#self.X_train.append(x)
+			#self.y_train.append(y)
+			#self.X_train.append(fx)
+			#self.y_train.append(fy)
+			
+			if (i % 1000 == 0):
+				print ('Loaded images:', i)
+
+		print ('Done image loading and augmentation')
 		self.X_train = np.array(self.X_train)
 		self.y_train = np.array(self.y_train)
 
@@ -208,10 +222,10 @@ class BehavioralCloningNN:
 
 	def make_generators(self):
 		self.train_datagen = ImageDataGenerator(
-					rotation_range=15,
-					height_shift_range=0.1,
-					shear_range= 0.2,
-					zoom_range = 0.2,
+					#rotation_range=5,
+					#width_shift_range=0.2,
+					shear_range= 0.05,
+					zoom_range = 0.05,
 					fill_mode = 'nearest'
 				  )
 		self.train_datagen.fit(self.X_train)
@@ -236,7 +250,7 @@ class BehavioralCloningNN:
 		self.model.add(Dense(50, activation="relu"))
 		self.model.add(Dense(10, activation="relu"))
 		self.model.add(Dense(1))
-		self.model.summary()
+		#self.model.summary()
 		# TODO: Compile and train the model
 		self.model.compile('adam', 'categorical_crossentropy', ['accuracy'])
 
@@ -244,8 +258,8 @@ class BehavioralCloningNN:
 
 
 	def train(self):
-		EPOCH = 10
-		opt = Adam(lr=0.00001)
+		EPOCH = 30
+		opt = Adam(lr=0.001)#, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
 		self.model.compile(optimizer=opt, loss='mse', metrics=['accuracy'])
 		history = self.model.fit_generator(
 		# ==== Unmask below line to dump image out to take snapshot of what's being fed into training process.
@@ -276,6 +290,7 @@ class BehavioralCloningNN:
 
 
 
+#data_path = 'data/'
 data_path = 'data/'
 nn = BehavioralCloningNN(data_path)
 nn.load_csv()

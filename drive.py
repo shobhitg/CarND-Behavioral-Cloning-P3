@@ -22,7 +22,7 @@ prev_image_array = None
 
 def preprocessImage(image):
     shape = image.shape
-    image = image[56:160,:,:]
+    image = image[40:160,:,:]
     image = cv2.resize(image,(200, 66), interpolation=cv2.INTER_AREA)    
     return image
 
