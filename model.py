@@ -55,7 +55,6 @@ class BehavioralCloningNN:
 	# Just for a plot based on timeline.
 	def timeline_plot(self):
 		mumeric_df = self.data[['Steering Angle', 'Throttle', 'Break', 'Speed']].astype(float)
-		# mumeric_df.plot(figsize=(20, 5))
 
 	# histogram of steering angles
 	def hist(self):
@@ -76,13 +75,13 @@ class BehavioralCloningNN:
 	def load_image_and_preprocess(self, imageData, i_lrc):    
 		if (i_lrc == 0):
 			path_file = imageData['Left Image']
-			shift_ang = .45
+			shift_ang = .25
 		if (i_lrc == 1):
 			path_file = imageData['Center Image']
 			shift_ang = 0.
 		if (i_lrc == 2):
 			path_file = imageData['Right Image']
-			shift_ang = -.45
+			shift_ang = -.25
 		y_steer = imageData['Steering Angle'] + shift_ang
 		image = self.load_image(path_file)
 
