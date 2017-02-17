@@ -1,6 +1,4 @@
-#**Traffic Sign Recognition**
-
-**Behavrioal Cloning Project**
+#**Behavrioal Cloning Project**
 
 The goals / steps of this project are the following:
 
